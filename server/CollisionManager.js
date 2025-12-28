@@ -32,10 +32,20 @@ class CollisionManager {
 
         // Push players apart equally
         const pushDistance = overlap / 2;
-        player1.x -= nx * pushDistance;
-        player1.y -= ny * pushDistance;
-        player2.x += nx * pushDistance;
-        player2.y += ny * pushDistance;
+        const newP1X = player1.x - nx * pushDistance;
+        const newP1Y = player1.y - ny * pushDistance;
+        const newP2X = player2.x + nx * pushDistance;
+        const newP2Y = player2.y + ny * pushDistance;
+
+        // Only apply push if it doesn't move players into walls
+        if (!this.maze.isWall(newP1X / CONFIG.TILE_SIZE, newP1Y / CONFIG.TILE_SIZE)) {
+            player1.x = newP1X;
+            player1.y = newP1Y;
+        }
+        if (!this.maze.isWall(newP2X / CONFIG.TILE_SIZE, newP2Y / CONFIG.TILE_SIZE)) {
+            player2.x = newP2X;
+            player2.y = newP2Y;
+        }
 
         // Calculate relative velocity along collision normal
         const relVelX = player1.vx - player2.vx;
@@ -133,8 +143,8 @@ class CollisionManager {
         const dy = tileY - centerY;
         const distanceToCenter = Math.sqrt(dx * dx + dy * dy);
 
-        // Collect if within threshold
-        if (distanceToCenter < 0.3) {
+        // Collect if within threshold (0.45 = ~3.6 pixels at tile size 8)
+        if (distanceToCenter < 0.45) {
             if (maze.hasDot(tileX, tileY)) {
                 maze.collectDot(tileX, tileY);
                 player.collectDot();

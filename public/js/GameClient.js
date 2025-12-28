@@ -90,6 +90,36 @@ class GameClient {
         this.networkManager.onPlayerLeft = (data) => {
             if (this.onPlayerLeft) this.onPlayerLeft(data);
         };
+
+        this.networkManager.onDotCollected = (data) => {
+            this.handleDotCollected(data);
+        };
+
+        this.networkManager.onPowerPelletCollected = (data) => {
+            this.handlePowerPelletCollected(data);
+        };
+    }
+
+    // Handle dot collected
+    handleDotCollected(data) {
+        if (!this.gameState || !this.gameState.maze) return;
+
+        // Remove dot from maze
+        const dotIndex = this.gameState.maze.dots.findIndex(d => d.x === data.x && d.y === data.y);
+        if (dotIndex !== -1) {
+            this.gameState.maze.dots.splice(dotIndex, 1);
+        }
+    }
+
+    // Handle power pellet collected
+    handlePowerPelletCollected(data) {
+        if (!this.gameState || !this.gameState.maze) return;
+
+        // Remove power pellet from maze
+        const pelletIndex = this.gameState.maze.powerPellets.findIndex(p => p.x === data.x && p.y === data.y);
+        if (pelletIndex !== -1) {
+            this.gameState.maze.powerPellets.splice(pelletIndex, 1);
+        }
     }
 
     // Handle game update from server

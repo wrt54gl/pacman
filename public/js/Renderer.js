@@ -48,7 +48,7 @@ class Renderer {
         if (!maze || !maze.layout) return;
 
         this.ctx.strokeStyle = '#2121ff';
-        this.ctx.lineWidth = 2;
+        this.ctx.lineWidth = 2 * this.scale;
 
         for (let y = 0; y < maze.layout.length; y++) {
             for (let x = 0; x < maze.layout[y].length; x++) {
@@ -58,10 +58,10 @@ class Renderer {
                 if (tile === 1) {
                     this.ctx.fillStyle = '#2121ff';
                     this.ctx.fillRect(
-                        x * CONFIG.TILE_SIZE,
-                        y * CONFIG.TILE_SIZE,
-                        CONFIG.TILE_SIZE,
-                        CONFIG.TILE_SIZE
+                        x * CONFIG.TILE_SIZE * this.scale,
+                        y * CONFIG.TILE_SIZE * this.scale,
+                        CONFIG.TILE_SIZE * this.scale,
+                        CONFIG.TILE_SIZE * this.scale
                     );
                 }
             }
@@ -75,11 +75,11 @@ class Renderer {
         this.ctx.fillStyle = '#ffb8ae';
 
         dots.forEach(dot => {
-            const x = dot.x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
-            const y = dot.y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
+            const x = (dot.x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2) * this.scale;
+            const y = (dot.y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2) * this.scale;
 
             this.ctx.beginPath();
-            this.ctx.arc(x, y, 2, 0, Math.PI * 2);
+            this.ctx.arc(x, y, 2 * this.scale, 0, Math.PI * 2);
             this.ctx.fill();
         });
     }
@@ -95,11 +95,11 @@ class Renderer {
             this.ctx.fillStyle = '#ffb8ae';
 
             pellets.forEach(pellet => {
-                const x = pellet.x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
-                const y = pellet.y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
+                const x = (pellet.x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2) * this.scale;
+                const y = (pellet.y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2) * this.scale;
 
                 this.ctx.beginPath();
-                this.ctx.arc(x, y, 4, 0, Math.PI * 2);
+                this.ctx.arc(x, y, 4 * this.scale, 0, Math.PI * 2);
                 this.ctx.fill();
             });
         }
@@ -109,8 +109,8 @@ class Renderer {
     renderPlayer(player) {
         if (!player || player.state === 'DEAD') return;
 
-        const x = player.x;
-        const y = player.y;
+        const x = player.x * this.scale;
+        const y = player.y * this.scale;
 
         // Draw Pac-Man as a circle with mouth animation
         this.ctx.fillStyle = player.color.hex;
@@ -122,31 +122,34 @@ class Renderer {
         }
 
         // Calculate mouth angle based on direction
-        let startAngle = 0;
-        let endAngle = Math.PI * 2;
-        const mouthSize = Math.abs(Math.sin(this.animationTime * 8)) * 0.3;
+        const mouthSize = Math.abs(Math.sin(this.animationTime * 8)) * 0.25;
+        let startAngle, endAngle;
 
         switch (player.direction) {
             case 'RIGHT':
-                startAngle = mouthSize;
-                endAngle = Math.PI * 2 - mouthSize;
+                // Mouth facing right
+                startAngle = 0.2 + mouthSize;
+                endAngle = Math.PI * 2 - 0.2 - mouthSize;
                 break;
             case 'LEFT':
-                startAngle = Math.PI + mouthSize;
-                endAngle = Math.PI - mouthSize;
+                // Mouth facing left - draw from just below PI around to just above PI
+                startAngle = Math.PI + 0.2 + mouthSize;
+                endAngle = Math.PI * 3 - 0.2 - mouthSize; // PI + 2*PI - 0.2 - mouthSize
                 break;
             case 'UP':
-                startAngle = Math.PI * 1.5 + mouthSize;
-                endAngle = Math.PI * 0.5 - mouthSize;
+                // Mouth facing up
+                startAngle = Math.PI * 1.5 + 0.2 + mouthSize;
+                endAngle = Math.PI * 3.5 - 0.2 - mouthSize; // 1.5*PI + 2*PI - 0.2 - mouthSize
                 break;
             case 'DOWN':
-                startAngle = Math.PI * 0.5 + mouthSize;
-                endAngle = Math.PI * 1.5 - mouthSize;
+                // Mouth facing down
+                startAngle = Math.PI * 0.5 + 0.2 + mouthSize;
+                endAngle = Math.PI * 2.5 - 0.2 - mouthSize; // 0.5*PI + 2*PI - 0.2 - mouthSize
                 break;
         }
 
         this.ctx.beginPath();
-        this.ctx.arc(x, y, CONFIG.PLAYER_RADIUS, startAngle, endAngle);
+        this.ctx.arc(x, y, CONFIG.PLAYER_RADIUS * this.scale, startAngle, endAngle);
         this.ctx.lineTo(x, y);
         this.ctx.fill();
 
@@ -157,8 +160,8 @@ class Renderer {
     renderGhost(ghost) {
         if (!ghost) return;
 
-        const x = ghost.x;
-        const y = ghost.y;
+        const x = ghost.x * this.scale;
+        const y = ghost.y * this.scale;
 
         // Ghost color based on state
         let color = '#fff';
@@ -178,27 +181,29 @@ class Renderer {
         // Draw simple ghost shape
         this.ctx.fillStyle = color;
 
+        const s = this.scale; // shorthand
+
         // Body (semi-circle top + rectangle bottom)
         this.ctx.beginPath();
-        this.ctx.arc(x, y - 1, CONFIG.GHOST_RADIUS - 1, Math.PI, 0);
+        this.ctx.arc(x, y - s, (CONFIG.GHOST_RADIUS - 1) * s, Math.PI, 0);
         this.ctx.rect(
-            x - CONFIG.GHOST_RADIUS + 1,
-            y - 1,
-            (CONFIG.GHOST_RADIUS - 1) * 2,
-            CONFIG.GHOST_RADIUS
+            x - (CONFIG.GHOST_RADIUS - 1) * s,
+            y - s,
+            (CONFIG.GHOST_RADIUS - 1) * 2 * s,
+            CONFIG.GHOST_RADIUS * s
         );
         this.ctx.fill();
 
         // Eyes (if not eaten)
         if (ghost.state !== 'EATEN') {
             this.ctx.fillStyle = '#fff';
-            this.ctx.fillRect(x - 3, y - 3, 2, 3);
-            this.ctx.fillRect(x + 1, y - 3, 2, 3);
+            this.ctx.fillRect(x - 3 * s, y - 3 * s, 2 * s, 3 * s);
+            this.ctx.fillRect(x + 1 * s, y - 3 * s, 2 * s, 3 * s);
 
             if (ghost.state !== 'FRIGHTENED') {
                 this.ctx.fillStyle = '#000';
-                this.ctx.fillRect(x - 2, y - 2, 1, 1);
-                this.ctx.fillRect(x + 2, y - 2, 1, 1);
+                this.ctx.fillRect(x - 2 * s, y - 2 * s, 1 * s, 1 * s);
+                this.ctx.fillRect(x + 2 * s, y - 2 * s, 1 * s, 1 * s);
             }
         }
     }

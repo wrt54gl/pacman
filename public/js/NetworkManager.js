@@ -91,6 +91,15 @@ class NetworkManager {
             if (this.onGameEnd) this.onGameEnd(data);
         });
 
+        // Dot collection events
+        this.socket.on('dot_collected', (data) => {
+            if (this.onDotCollected) this.onDotCollected(data);
+        });
+
+        this.socket.on('power_pellet_collected', (data) => {
+            if (this.onPowerPelletCollected) this.onPowerPelletCollected(data);
+        });
+
         // Error events
         this.socket.on('error', (data) => {
             console.error('Server error:', data.message);
