@@ -11,6 +11,7 @@ const playerList = document.getElementById('player-list');
 const countdownText = document.getElementById('countdown-text');
 const playerNameInput = document.getElementById('player-name');
 const joinBtn = document.getElementById('join-btn');
+const startGameBtn = document.getElementById('start-game-btn');
 const playAgainBtn = document.getElementById('play-again-btn');
 const resultText = document.getElementById('result-text');
 const finalScores = document.getElementById('final-scores');
@@ -51,6 +52,12 @@ function setupUI() {
         }
     });
 
+    // Start game button
+    startGameBtn.addEventListener('click', () => {
+        gameClient.networkManager.startGame();
+        startGameBtn.disabled = true;
+    });
+
     // Play again button
     playAgainBtn.addEventListener('click', () => {
         showScreen('lobby');
@@ -59,6 +66,7 @@ function setupUI() {
         playerNameInput.value = '';
         playerNameInput.disabled = false;
         joinBtn.disabled = false;
+        startGameBtn.disabled = false;
         gameClient.reset();
     });
 

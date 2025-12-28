@@ -49,6 +49,17 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Manual game start
+    socket.on('game:start', () => {
+        const room = rooms.get(socket.roomId);
+        if (room) {
+            const started = room.manualStartGame();
+            if (!started) {
+                socket.emit('error', { message: 'Cannot start game yet' });
+            }
+        }
+    });
+
     // Disconnect
     socket.on('disconnect', () => {
         console.log(`Player disconnected: ${socket.id}`);

@@ -48,11 +48,7 @@ class Room {
         // Send current room state
         this.broadcastRoomState();
 
-        // Check if we can start
-        if (this.canStart()) {
-            this.startGameCountdown();
-        }
-
+        // Manual start - no auto-start
         return true;
     }
 
@@ -111,6 +107,15 @@ class Room {
     canStart() {
         return this.state === 'WAITING' &&
                this.players.size >= this.minPlayersToStart;
+    }
+
+    // Manually start game (triggered by button)
+    manualStartGame() {
+        if (!this.canStart()) {
+            return false;
+        }
+        this.startGameCountdown();
+        return true;
     }
 
     // Start game countdown

@@ -102,6 +102,11 @@ class NetworkManager {
         this.socket.emit('room:join', { playerName });
     }
 
+    // Start the game manually
+    startGame() {
+        this.socket.emit('game:start');
+    }
+
     // Send player input
     sendInput(input) {
         this.socket.emit('input', input);
