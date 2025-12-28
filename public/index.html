@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Pac-Man</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Lobby Screen -->
+        <div id="lobby" class="screen active">
+            <h1>Multiplayer Pac-Man</h1>
+            <div id="lobby-content">
+                <div id="name-entry">
+                    <input type="text" id="player-name" placeholder="Enter your name" maxlength="15">
+                    <button id="join-btn">Join Game</button>
+                </div>
+                <div id="room-info" style="display: none;">
+                    <h2>Waiting for players...</h2>
+                    <div id="player-list"></div>
+                    <p id="countdown-text"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div id="game-container">
+                <canvas id="game-canvas" width="448" height="576"></canvas>
+                <div id="game-ui">
+                    <div id="scoreboard">
+                        <h3>Scores</h3>
+                        <div id="score-list"></div>
+                    </div>
+                    <div id="status">
+                        <p id="game-status"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over" class="screen">
+            <h1>Game Over</h1>
+            <div id="game-over-content">
+                <h2 id="result-text"></h2>
+                <div id="final-scores"></div>
+                <button id="play-again-btn">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Socket.io client library -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Load game files -->
+    <script src="js/config.js"></script>
+    <script src="js/NetworkManager.js"></script>
+    <script src="js/Renderer.js"></script>
+    <script src="js/InputManager.js"></script>
+    <script src="js/Predictor.js"></script>
+    <script src="js/StateInterpolator.js"></script>
+    <script src="js/GameClient.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
