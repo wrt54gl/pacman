@@ -53,6 +53,7 @@ class NetworkManager {
         });
 
         this.socket.on('room_state', (data) => {
+            console.log('Received room_state event:', data);
             if (this.onRoomState) this.onRoomState(data);
         });
 
@@ -104,6 +105,9 @@ class NetworkManager {
 
     // Start the game manually
     startGame() {
+        console.log('NetworkManager.startGame() called');
+        console.log('Socket:', this.socket);
+        console.log('Emitting game:start event...');
         this.socket.emit('game:start');
     }
 

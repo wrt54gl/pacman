@@ -32,11 +32,13 @@ io.on('connection', (socket) => {
             rooms.set(room.id, room);
         }
 
+        // Join Socket.io room BEFORE adding player so they receive broadcasts
+        socket.join(room.id);
+        socket.roomId = room.id;
+
         // Add player to room
         const success = room.addPlayer(socket, playerName);
         if (success) {
-            socket.join(room.id);
-            socket.roomId = room.id;
             console.log(`Player ${playerName} joined ${room.id}`);
         }
     });
@@ -51,12 +53,19 @@ io.on('connection', (socket) => {
 
     // Manual game start
     socket.on('game:start', () => {
+        console.log(`Manual game start requested by ${socket.id}`);
         const room = rooms.get(socket.roomId);
         if (room) {
+            console.log(`Room found: ${room.id}, state: ${room.state}, players: ${room.players.size}`);
             const started = room.manualStartGame();
             if (!started) {
+                console.log('Game could not be started');
                 socket.emit('error', { message: 'Cannot start game yet' });
+            } else {
+                console.log('Game starting...');
             }
+        } else {
+            console.log('Room not found for socket');
         }
     });
 

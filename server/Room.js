@@ -251,6 +251,7 @@ class Room {
             }))
         };
 
+        console.log('Broadcasting room state:', JSON.stringify(state));
         this.broadcast('room_state', state);
     }
 

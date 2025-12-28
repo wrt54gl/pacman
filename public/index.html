@@ -19,7 +19,7 @@
                 <div id="room-info" style="display: none;">
                     <h2>Waiting for players...</h2>
                     <div id="player-list"></div>
-                    <button id="start-game-btn">Start Game Now</button>
+                    <button id="start-game-btn" onclick="handleStartButtonClick()">Start Game Now</button>
                     <p id="countdown-text"></p>
                 </div>
             </div>
@@ -54,6 +54,23 @@
 
     <!-- Load Socket.io client library -->
     <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Define global handler early -->
+    <script>
+        window.handleStartButtonClick = function() {
+            console.log('START BUTTON CLICKED!');
+
+            // Get the gameClient from window scope
+            if (window.gameClient && window.gameClient.networkManager) {
+                console.log('Sending start game event...');
+                window.gameClient.networkManager.startGame();
+                document.getElementById('start-game-btn').disabled = true;
+            } else {
+                console.error('Game client not ready!', window.gameClient);
+                alert('Game not ready yet. Please wait a moment and try again.');
+            }
+        };
+    </script>
 
     <!-- Load game files -->
     <script src="js/config.js"></script>

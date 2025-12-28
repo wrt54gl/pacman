@@ -1,40 +1,79 @@
 // Main entry point
 let gameClient = null;
+window.gameClient = null; // Expose on window for onclick handler
 
-// UI Elements
-const lobbyScreen = document.getElementById('lobby');
-const gameScreen = document.getElementById('game-screen');
-const gameOverScreen = document.getElementById('game-over');
-const nameEntry = document.getElementById('name-entry');
-const roomInfo = document.getElementById('room-info');
-const playerList = document.getElementById('player-list');
-const countdownText = document.getElementById('countdown-text');
-const playerNameInput = document.getElementById('player-name');
-const joinBtn = document.getElementById('join-btn');
-const startGameBtn = document.getElementById('start-game-btn');
-const playAgainBtn = document.getElementById('play-again-btn');
-const resultText = document.getElementById('result-text');
-const finalScores = document.getElementById('final-scores');
+// UI Elements - will be initialized after DOM loads
+let lobbyScreen, gameScreen, gameOverScreen, nameEntry, roomInfo;
+let playerList, countdownText, playerNameInput, joinBtn, startGameBtn;
+let playAgainBtn, resultText, finalScores;
+
+// Global handler for start button (called from HTML onclick)
+window.handleStartButtonClick = function() {
+    console.log('handleStartButtonClick called from HTML onclick!');
+
+    if (!gameClient) {
+        console.error('gameClient not initialized');
+        alert('Game not ready yet!');
+        return;
+    }
+
+    if (!gameClient.networkManager) {
+        console.error('networkManager not initialized');
+        alert('Network not ready yet!');
+        return;
+    }
+
+    console.log('Sending game start request to server...');
+    gameClient.networkManager.startGame();
+
+    // Disable button
+    const btn = document.getElementById('start-game-btn');
+    if (btn) btn.disabled = true;
+};
 
 // Initialize when page loads
 window.addEventListener('load', async () => {
+    // Get UI elements after DOM is ready
+    lobbyScreen = document.getElementById('lobby');
+    gameScreen = document.getElementById('game-screen');
+    gameOverScreen = document.getElementById('game-over');
+    nameEntry = document.getElementById('name-entry');
+    roomInfo = document.getElementById('room-info');
+    playerList = document.getElementById('player-list');
+    countdownText = document.getElementById('countdown-text');
+    playerNameInput = document.getElementById('player-name');
+    joinBtn = document.getElementById('join-btn');
+    startGameBtn = document.getElementById('start-game-btn');
+    playAgainBtn = document.getElementById('play-again-btn');
+    resultText = document.getElementById('result-text');
+    finalScores = document.getElementById('final-scores');
+
     console.log('Initializing Multiplayer Pac-Man...');
 
     try {
         gameClient = new GameClient();
+        window.gameClient = gameClient; // Expose on window for onclick handler
         await gameClient.init();
+        console.log('About to call setupUI()');
         setupUI();
         console.log('Game client initialized');
     } catch (error) {
         console.error('Failed to initialize game:', error);
+        console.error('Error stack:', error.stack);
         alert('Failed to connect to game server. Please refresh the page.');
     }
 });
 
 // Setup UI event handlers
 function setupUI() {
-    // Join button
-    joinBtn.addEventListener('click', () => {
+    try {
+        console.log('setupUI called');
+        console.log('joinBtn:', joinBtn);
+        console.log('startGameBtn:', startGameBtn);
+        console.log('playAgainBtn:', playAgainBtn);
+
+        // Join button
+        joinBtn.addEventListener('click', () => {
         const playerName = playerNameInput.value.trim();
         if (playerName) {
             gameClient.joinRoom(playerName);
@@ -53,22 +92,42 @@ function setupUI() {
     });
 
     // Start game button
-    startGameBtn.addEventListener('click', () => {
-        gameClient.networkManager.startGame();
-        startGameBtn.disabled = true;
-    });
+    if (startGameBtn) {
+        console.log('Start game button found and event listener attached');
+        startGameBtn.addEventListener('click', (e) => {
+            console.log('Start game button clicked!');
+            console.log('Event:', e);
+            console.log('gameClient:', gameClient);
+            console.log('networkManager:', gameClient?.networkManager);
+
+            if (gameClient && gameClient.networkManager) {
+                console.log('Calling startGame()...');
+                gameClient.networkManager.startGame();
+                startGameBtn.disabled = true;
+            } else {
+                console.error('Game client or network manager not initialized');
+                alert('Game client not ready!');
+            }
+        });
+    } else {
+        console.error('Start game button not found in DOM');
+    }
 
     // Play again button
-    playAgainBtn.addEventListener('click', () => {
-        showScreen('lobby');
-        nameEntry.style.display = 'block';
-        roomInfo.style.display = 'none';
-        playerNameInput.value = '';
-        playerNameInput.disabled = false;
-        joinBtn.disabled = false;
-        startGameBtn.disabled = false;
-        gameClient.reset();
-    });
+    if (playAgainBtn) {
+        playAgainBtn.addEventListener('click', () => {
+            showScreen('lobby');
+            nameEntry.style.display = 'block';
+            roomInfo.style.display = 'none';
+            playerNameInput.value = '';
+            playerNameInput.disabled = false;
+            joinBtn.disabled = false;
+            startGameBtn.disabled = false;
+            gameClient.reset();
+        });
+    } else {
+        console.error('Play again button not found in DOM');
+    }
 
     // Setup game client callbacks
     gameClient.onRoomJoined = handleRoomJoined;
@@ -79,6 +138,11 @@ function setupUI() {
     gameClient.onRoomState = handleRoomState;
     gameClient.onPlayerJoined = handlePlayerJoined;
     gameClient.onPlayerLeft = handlePlayerLeft;
+
+    } catch (error) {
+        console.error('Error in setupUI:', error);
+        console.error('Error stack:', error.stack);
+    }
 }
 
 // Show screen
@@ -158,15 +222,20 @@ function handleGameEnd(data) {
 
 // Handle room state update
 function handleRoomState(data) {
+    console.log('handleRoomState called with:', data);
     playerList.innerHTML = '';
 
     if (data.players) {
+        console.log('Rendering', data.players.length, 'players');
         data.players.forEach(player => {
+            console.log('Adding player:', player.name, 'color:', player.color.name);
             const playerItem = document.createElement('div');
             playerItem.className = `player-item ${player.color.name}`;
             playerItem.textContent = player.name;
             playerList.appendChild(playerItem);
         });
+    } else {
+        console.log('No players in data');
     }
 }
 
