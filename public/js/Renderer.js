@@ -146,6 +146,11 @@ class Renderer {
                 startAngle = Math.PI * 0.5 + 0.2 + mouthSize;
                 endAngle = Math.PI * 2.5 - 0.2 - mouthSize; // 0.5*PI + 2*PI - 0.2 - mouthSize
                 break;
+            default:
+                // NONE or unknown direction - draw full circle
+                startAngle = 0;
+                endAngle = Math.PI * 2;
+                break;
         }
 
         this.ctx.beginPath();

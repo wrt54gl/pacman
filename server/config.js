@@ -56,10 +56,10 @@ const CONFIG = {
     ],
 
     PLAYER_SPAWN_POINTS: [
-        { x: 13.5, y: 23, direction: 'LEFT' },  // Classic center-bottom
-        { x: 1, y: 1, direction: 'RIGHT' },      // Top-left
-        { x: 26, y: 1, direction: 'LEFT' },      // Top-right
-        { x: 13.5, y: 5, direction: 'DOWN' }     // Upper-center
+        { x: 14.5, y: 29.5, direction: 'NONE' }, // Center-bottom (centered on tile 14,29 - valid path)
+        { x: 1.5, y: 1.5, direction: 'NONE' },   // Top-left (centered on tile 1,1)
+        { x: 26.5, y: 1.5, direction: 'NONE' },  // Top-right (centered on tile 26,1)
+        { x: 14.5, y: 5.5, direction: 'NONE' }   // Upper-center (centered on tile 14,5)
     ],
 
     // Ghost spawn positions (tile coordinates)

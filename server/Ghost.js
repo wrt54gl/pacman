@@ -65,6 +65,16 @@ class Ghost {
             this.updateDirection(target);
         }
 
+        // Safety check: if current direction leads to wall, update direction immediately
+        const nextTile = this.pathfinding.getNextTile(
+            Math.floor(this.x / CONFIG.TILE_SIZE),
+            Math.floor(this.y / CONFIG.TILE_SIZE),
+            this.direction
+        );
+        if (this.maze.isWall(nextTile.x, nextTile.y)) {
+            this.updateDirection(target);
+        }
+
         // Move
         this.move(deltaTime);
 
@@ -250,6 +260,17 @@ class Ghost {
         if (tunnelExit) {
             this.x = tunnelExit.x * CONFIG.TILE_SIZE;
             this.y = tunnelExit.y * CONFIG.TILE_SIZE;
+        }
+
+        // Safety check: ensure ghost stays within bounds
+        const pixelTileX = Math.floor(this.x / CONFIG.TILE_SIZE);
+        const pixelTileY = Math.floor(this.y / CONFIG.TILE_SIZE);
+        if (pixelTileX < 0 || pixelTileX >= this.maze.width ||
+            pixelTileY < 0 || pixelTileY >= this.maze.height) {
+            // Ghost went out of bounds - snap back to spawn
+            console.warn(`Ghost ${this.type} went out of bounds at (${pixelTileX}, ${pixelTileY}), returning to spawn`);
+            this.x = this.spawnX;
+            this.y = this.spawnY;
         }
     }
 

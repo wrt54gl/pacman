@@ -88,6 +88,7 @@ class Maze {
         }
 
         const tile = this.layout[tileY][tileX];
+        // Only WALL tiles are impassable (EMPTY tiles are valid paths)
         return tile === TILE.WALL;
     }
 

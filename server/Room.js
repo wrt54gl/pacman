@@ -27,7 +27,12 @@ class Room {
             return this.addPlayerMidGame(socket, playerName);
         }
 
-        const spawnIndex = this.players.size;
+        const spawnIndex = this.getAvailableSpawnIndex();
+        if (spawnIndex === -1) {
+            socket.emit('error', { message: 'No available spawn points' });
+            return false;
+        }
+
         const player = new Player(socket.id, playerName, spawnIndex);
         this.players.set(socket.id, player);
 

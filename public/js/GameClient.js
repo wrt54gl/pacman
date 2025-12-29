@@ -63,6 +63,8 @@ class GameClient {
 
         this.networkManager.onGameStarted = (data) => {
             console.log('Game started');
+            console.log('Initial game state:', data.gameState);
+            console.log('Players in state:', data.gameState?.players);
             this.gameState = data.gameState;
             this.interpolator.addState(data.gameState);
             this.startGameLoop();
