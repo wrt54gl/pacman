@@ -4,6 +4,7 @@ class GameClient {
         this.networkManager = new NetworkManager();
         this.renderer = null;
         this.inputManager = null;
+        this.audioManager = new AudioManager();
         this.predictor = new Predictor();
         this.interpolator = new StateInterpolator();
 
@@ -67,6 +68,12 @@ class GameClient {
             console.log('Players in state:', data.gameState?.players);
             this.gameState = data.gameState;
             this.interpolator.addState(data.gameState);
+
+            // Initialize audio on first user interaction
+            this.audioManager.init();
+            this.audioManager.playGameStart();
+            this.audioManager.startSiren();
+
             this.startGameLoop();
             if (this.onGameStarted) this.onGameStarted(data);
         };
@@ -78,6 +85,7 @@ class GameClient {
         this.networkManager.onGameEnd = (data) => {
             console.log('Game ended:', data);
             this.stopGameLoop();
+            this.audioManager.stopSiren();
             if (this.onGameEnd) this.onGameEnd(data);
         };
 
@@ -100,6 +108,14 @@ class GameClient {
         this.networkManager.onPowerPelletCollected = (data) => {
             this.handlePowerPelletCollected(data);
         };
+
+        this.networkManager.onGhostEaten = (data) => {
+            this.handleGhostEaten(data);
+        };
+
+        this.networkManager.onPlayerDied = (data) => {
+            this.handlePlayerDied(data);
+        };
     }
 
     // Handle dot collected
@@ -111,6 +127,9 @@ class GameClient {
         if (dotIndex !== -1) {
             this.gameState.maze.dots.splice(dotIndex, 1);
         }
+
+        // Play waka sound
+        this.audioManager.playWaka();
     }
 
     // Handle power pellet collected
@@ -121,6 +140,23 @@ class GameClient {
         const pelletIndex = this.gameState.maze.powerPellets.findIndex(p => p.x === data.x && p.y === data.y);
         if (pelletIndex !== -1) {
             this.gameState.maze.powerPellets.splice(pelletIndex, 1);
+        }
+
+        // Play power pellet sound
+        this.audioManager.playPowerPellet();
+    }
+
+    // Handle ghost eaten
+    handleGhostEaten(data) {
+        // Play ghost eaten sound
+        this.audioManager.playGhostEaten();
+    }
+
+    // Handle player died
+    handlePlayerDied(data) {
+        // Only play death sound if it's the local player
+        if (data.playerId === this.playerId) {
+            this.audioManager.playDeath();
         }
     }
 

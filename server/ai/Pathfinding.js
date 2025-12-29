@@ -60,6 +60,18 @@ class Pathfinding {
                 continue;
             }
 
+            // Special case: allow movement into tunnel on row 14
+            if (tileY === 14) {
+                if (direction === 'LEFT' && tileX <= 1) {
+                    possible.push(direction);
+                    continue;
+                }
+                if (direction === 'RIGHT' && tileX >= 26) {
+                    possible.push(direction);
+                    continue;
+                }
+            }
+
             // Check if can move in this direction
             const nextTile = this.getNextTile(tileX, tileY, direction);
             if (!this.maze.isWall(nextTile.x, nextTile.y)) {

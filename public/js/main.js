@@ -129,6 +129,15 @@ function setupUI() {
         console.error('Play again button not found in DOM');
     }
 
+    // Mute button
+    const muteBtn = document.getElementById('mute-btn');
+    if (muteBtn) {
+        muteBtn.addEventListener('click', () => {
+            const muted = gameClient.audioManager.toggleMute();
+            muteBtn.textContent = muted ? '🔇 Sound OFF' : '🔊 Sound ON';
+        });
+    }
+
     // Setup game client callbacks
     gameClient.onRoomJoined = handleRoomJoined;
     gameClient.onGameStarting = handleGameStarting;

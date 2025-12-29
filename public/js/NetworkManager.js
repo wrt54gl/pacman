@@ -100,6 +100,15 @@ class NetworkManager {
             if (this.onPowerPelletCollected) this.onPowerPelletCollected(data);
         });
 
+        // Ghost/Player collision events
+        this.socket.on('ghost_eaten', (data) => {
+            if (this.onGhostEaten) this.onGhostEaten(data);
+        });
+
+        this.socket.on('player_died', (data) => {
+            if (this.onPlayerDied) this.onPlayerDied(data);
+        });
+
         // Error events
         this.socket.on('error', (data) => {
             console.error('Server error:', data.message);

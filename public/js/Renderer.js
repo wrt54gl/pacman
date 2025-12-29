@@ -10,6 +10,45 @@ class Renderer {
         // Animation
         this.animationTime = 0;
         this.powerPelletBlink = true;
+
+        // Setup auto-resize
+        this.setupAutoResize();
+        this.resize(); // Initial resize
+    }
+
+    // Setup automatic window resize
+    setupAutoResize() {
+        window.addEventListener('resize', () => this.resize());
+    }
+
+    // Resize canvas to fit window while maintaining aspect ratio
+    resize() {
+        const gameAspectRatio = this.width / this.height;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const windowAspectRatio = windowWidth / windowHeight;
+
+        let canvasWidth, canvasHeight;
+
+        // Fit to window while maintaining aspect ratio
+        if (windowAspectRatio > gameAspectRatio) {
+            // Window is wider - fit to height
+            canvasHeight = windowHeight * 0.95; // 95% of window height
+            canvasWidth = canvasHeight * gameAspectRatio;
+        } else {
+            // Window is taller - fit to width
+            canvasWidth = windowWidth * 0.95; // 95% of window width
+            canvasHeight = canvasWidth / gameAspectRatio;
+        }
+
+        // Update canvas size
+        this.canvas.width = canvasWidth;
+        this.canvas.height = canvasHeight;
+
+        // Calculate new scale
+        this.scale = canvasWidth / this.width;
+
+        console.log(`Canvas resized: ${canvasWidth}x${canvasHeight}, scale: ${this.scale.toFixed(2)}`);
     }
 
     // Clear canvas
@@ -107,10 +146,16 @@ class Renderer {
 
     // Render player
     renderPlayer(player) {
-        if (!player || player.state === 'DEAD') return;
+        if (!player) return;
 
         const x = player.x * this.scale;
         const y = player.y * this.scale;
+
+        // Handle death animation
+        if (player.state === 'DEAD') {
+            this.renderDeathAnimation(player, x, y);
+            return;
+        }
 
         // Draw Pac-Man as a circle with mouth animation
         this.ctx.fillStyle = player.color.hex;
@@ -159,6 +204,61 @@ class Renderer {
         this.ctx.fill();
 
         this.ctx.globalAlpha = 1;
+    }
+
+    // Render death animation
+    renderDeathAnimation(player, x, y) {
+        const deathDuration = 2000; // 2 second death animation
+        const elapsed = Date.now() - player.deathTime;
+        const progress = Math.min(elapsed / deathDuration, 1);
+
+        if (progress >= 1) {
+            return; // Animation complete
+        }
+
+        this.ctx.fillStyle = player.color.hex;
+
+        // Animation progresses in stages:
+        // 0-0.8: Rotate and open mouth
+        // 0.8-1.0: Shrink and fade
+
+        if (progress < 0.8) {
+            // Spinning phase
+            const spinProgress = progress / 0.8;
+            const rotation = spinProgress * Math.PI * 4; // 2 full rotations
+            const mouthOpening = spinProgress * 0.8; // Mouth opens wider
+
+            this.ctx.save();
+            this.ctx.translate(x, y);
+            this.ctx.rotate(rotation);
+
+            // Draw Pac-Man with increasingly wide mouth
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, CONFIG.PLAYER_RADIUS * this.scale,
+                        mouthOpening, Math.PI * 2 - mouthOpening);
+            this.ctx.lineTo(0, 0);
+            this.ctx.fill();
+
+            this.ctx.restore();
+        } else {
+            // Shrinking phase
+            const shrinkProgress = (progress - 0.8) / 0.2;
+            const scale = 1 - shrinkProgress;
+            const alpha = 1 - shrinkProgress;
+
+            this.ctx.globalAlpha = alpha;
+
+            this.ctx.save();
+            this.ctx.translate(x, y);
+
+            // Draw shrinking circle
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, CONFIG.PLAYER_RADIUS * this.scale * scale, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            this.ctx.restore();
+            this.ctx.globalAlpha = 1;
+        }
     }
 
     // Render ghost

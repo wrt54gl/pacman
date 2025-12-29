@@ -110,8 +110,10 @@ class Maze {
         // Tunnel is on row 14
         if (tileY === 14) {
             if (x < 0) {
+                console.log(`Tunnel wrap: ${x} → ${this.width - 0.5} (left to right)`);
                 return { x: this.width - 0.5, y };
             } else if (x >= this.width) {
+                console.log(`Tunnel wrap: ${x} → 0.5 (right to left)`);
                 return { x: 0.5, y };
             }
         }

@@ -33,6 +33,7 @@ class Player {
         this.powerModeEndTime = 0;
         this.invulnerableUntil = 0;
         this.respawnTime = 0;
+        this.deathTime = 0;
 
         // Network
         this.lastProcessedInput = 0;
@@ -215,6 +216,18 @@ class Player {
         const tileX = Math.floor(this.x / CONFIG.TILE_SIZE);
         const tileY = Math.floor(this.y / CONFIG.TILE_SIZE);
 
+        // Special case: allow movement into tunnel on row 14
+        if (tileY === 14) {
+            if (direction === 'LEFT' && tileX <= 1) {
+                // Allow moving left into/through tunnel entrance
+                return true;
+            }
+            if (direction === 'RIGHT' && tileX >= 26) {
+                // Allow moving right into/through tunnel entrance
+                return true;
+            }
+        }
+
         let checkX = tileX;
         let checkY = tileY;
 
@@ -291,6 +304,7 @@ class Player {
     die() {
         this.lives--;
         this.state = 'DEAD';
+        this.deathTime = Date.now(); // Track when player died for animation
         this.endPowerMode();
         this.vx = 0;
         this.vy = 0;
@@ -317,6 +331,7 @@ class Player {
         this.state = 'ALIVE';
         this.invulnerableUntil = Date.now() + CONFIG.PLAYER_SPAWN_INVULNERABILITY;
         this.respawnTime = 0;
+        this.deathTime = 0; // Clear death time
         this.hasReceivedInput = false; // Wait for input after respawn
 
         return true;
@@ -358,7 +373,8 @@ class Player {
             score: this.score,
             state: this.state,
             invulnerable: this.isInvulnerable(),
-            lastProcessedInput: this.lastProcessedInput
+            lastProcessedInput: this.lastProcessedInput,
+            deathTime: this.deathTime || 0
         };
     }
 }
